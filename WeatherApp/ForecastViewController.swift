@@ -14,8 +14,25 @@ class ForecastViewController : UIViewController, UISearchBarDelegate, CLLocation
   let WEATHER_URL = "http://api.openweathermap.org/data/2.5/onecall"
   let APP_ID = "APP_ID"
       
-  @IBOutlet weak var searchBar: UISearchBar!
   @IBOutlet weak var tableView: UITableView!
+  
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    tableView.dataSource = self
+    tableView.delegate = self
+    tableView.translatesAutoresizingMaskIntoConstraints = false
+    view.addSubview(tableView)
+    NSLayoutConstraint.activate([
+        view.safeAreaLayoutGuide.bottomAnchor.constraint(equalTo: tableView.bottomAnchor),
+        view.leadingAnchor.constraint(equalTo: tableView.leadingAnchor),
+        view.trailingAnchor.constraint(equalTo: tableView.trailingAnchor),
+        ])
+    refreshControl.tintColor = UIColor.white;
+    refreshControl.attributedTitle = NSAttributedString(string: "Pull to refresh", attributes: [NSAttributedString.Key.foregroundColor:UIColor.white])
+    refreshControl.addTarget(self, action: #selector(refresh), for: UIControl.Event.valueChanged)
+    tableView.addSubview(refreshControl)
+    getWeatherData()
+  }
   
   @objc func refresh(refrshcontrol: UIRefreshControl){
     print("refreshed")
@@ -25,86 +42,30 @@ class ForecastViewController : UIViewController, UISearchBarDelegate, CLLocation
     dateFormatter.timeZone = .current
     refreshControl.attributedTitle = NSAttributedString(string:"Last updated on " + dateFormatter.string(from: date), attributes: [NSAttributedString.Key.foregroundColor:UIColor.white])
     refreshControl.endRefreshing()
-    getWeatherData(location: "Waterloo, ON")
-  }
-  
-  override func viewDidLoad() {
-    super.viewDidLoad()
-    tableView.dataSource = self
-    tableView.delegate = self
-    searchBar.delegate = self
-    tableView.translatesAutoresizingMaskIntoConstraints = false
-    self.view.addSubview(tableView)
-    NSLayoutConstraint.activate([
-        self.searchBar.bottomAnchor.constraint(equalTo: tableView.topAnchor),
-        self.view.safeAreaLayoutGuide.bottomAnchor.constraint(equalTo: tableView.bottomAnchor),
-        self.view.leadingAnchor.constraint(equalTo: tableView.leadingAnchor),
-        self.view.trailingAnchor.constraint(equalTo: tableView.trailingAnchor),
-        ])
-    self.refreshControl.tintColor = UIColor.white;
-    self.refreshControl.attributedTitle = NSAttributedString(string: "Pull to refresh", attributes: [NSAttributedString.Key.foregroundColor:UIColor.white])
-    self.refreshControl.addTarget(self, action: #selector(refresh), for: UIControl.Event.valueChanged)
-    
-    if let textfield = searchBar.value(forKey: "searchField") as? UITextField {
-      textfield.textColor = UIColor.white
-      let imageV = textfield.leftView as! UIImageView
-      imageV.image = imageV.image?.withRenderingMode(UIImage.RenderingMode.alwaysTemplate)
-      imageV.tintColor = UIColor.gray
-    }
-    
-    tableView.addSubview(refreshControl)
+    getWeatherData()
   }
   
   override func didReceiveMemoryWarning() {
     super.didReceiveMemoryWarning()
   }
   
-  func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-    searchBar.resignFirstResponder()
-    if let cityName = searchBar.text, !cityName.isEmpty {
-        getWeatherData(location: cityName)
-    }
-  }
-  
-  func getCoordinate( addressString : String,
-                      completionHandler: @escaping(CLLocationCoordinate2D, NSError?) -> Void ) {
-    let geocoder = CLGeocoder()
-    geocoder.geocodeAddressString(addressString) { (placemarks, error) in
-      if error == nil {
-        if let placemark = placemarks?[0] {
-          let location = placemark.location!
-          
-          completionHandler(location.coordinate, nil)
-          return
-        }
-      }
-      completionHandler(kCLLocationCoordinate2DInvalid, error as NSError?)
-    }
-  }
-  
-  func getWeatherData(location: String){
-    getCoordinate(addressString: location, completionHandler: {coord,error in
-      let lon = String(coord.longitude)
-      let lat = String(coord.latitude)
-      let params : [String:String] = ["lat": lat, "lon": lon, "cnt": "7", "appid": self.APP_ID, "exclude": "current,minutely,hourly,alerts"]
-      
-      Alamofire.request(self.WEATHER_URL, method: .get, parameters: params).responseArray(keyPath: "daily"){ (response: DataResponse<[Forecast]>) in
-        if let forecastArray = response.result.value{
-          self.forecastArray = forecastArray
-          self.tableView.reloadData()
-        } else{
-          let alert = UIAlertController(title: "Error", message: "Could not fetch forecast data", preferredStyle: UIAlertController.Style.alert)
-          alert.addAction(UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: nil))
-          self.present(alert, animated: true, completion: nil)
-          print(error ?? "Could not fetch forecast data")
-        }
-      }
-    })
-  }
-  
-  func fillForecastData(json: JSON) {
+  func getWeatherData(){
+    let lon = UserDefaults.standard.string(forKey: "longitude") ?? ""
+    let lat = UserDefaults.standard.string(forKey: "latitude") ?? ""
+    let params : [String:String] = ["lat": lat, "lon": lon, "cnt": "7", "appid": self.APP_ID, "exclude": "current,minutely,hourly,alerts"]
     
-    self.tableView.reloadData()
+    Alamofire.request(self.WEATHER_URL, method: .get, parameters: params).responseArray(keyPath: "daily"){ (response: DataResponse<[Forecast]>) in
+      if let forecastArray = response.result.value{
+        self.forecastArray = forecastArray
+        self.tableView.reloadData()
+      } else{
+        let alert = UIAlertController(title: "Error", message: "Could not fetch forecast data", preferredStyle: UIAlertController.Style.alert)
+        alert.addAction(UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: nil))
+        self.present(alert, animated: true, completion: nil)
+        print("Could not fetch forecast data")
+      }
+    }
+    tableView.reloadData()
   }
   
   
