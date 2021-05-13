@@ -1,37 +1,33 @@
 import UIKit
-import CoreLocation
-import SwiftyJSON
 import Alamofire
 import AlamofireObjectMapper
 
-class ForecastViewController : UIViewController, UISearchBarDelegate, CLLocationManagerDelegate, UITableViewDelegate, UITableViewDataSource {
-    
-  let locationManager = CLLocationManager()
-  let refreshControl = UIRefreshControl()
-  var forecastArray : [Forecast]?
+class ForecastViewController : UIViewController, UISearchBarDelegate, UICollectionViewDataSource, UICollectionViewDelegate {
+  
+  @IBOutlet weak var collectionView: UICollectionView!
   
   //constants
   let WEATHER_URL = "http://api.openweathermap.org/data/2.5/onecall"
   let APP_ID = "APP_ID"
-      
-  @IBOutlet weak var tableView: UITableView!
   
+  let refreshControl = UIRefreshControl()
+  var forecastArray : [Forecast]?
+
   override func viewDidLoad() {
     super.viewDidLoad()
-    tableView.dataSource = self
-    tableView.delegate = self
-    tableView.translatesAutoresizingMaskIntoConstraints = false
-    view.addSubview(tableView)
-    NSLayoutConstraint.activate([
-        view.safeAreaLayoutGuide.bottomAnchor.constraint(equalTo: tableView.bottomAnchor),
-        view.leadingAnchor.constraint(equalTo: tableView.leadingAnchor),
-        view.trailingAnchor.constraint(equalTo: tableView.trailingAnchor),
-        ])
+    collectionView.alwaysBounceVertical = true
+    collectionView.dataSource = self
+    collectionView.delegate = self
     refreshControl.tintColor = UIColor.white;
     refreshControl.attributedTitle = NSAttributedString(string: "Pull to refresh", attributes: [NSAttributedString.Key.foregroundColor:UIColor.white])
     refreshControl.addTarget(self, action: #selector(refresh), for: UIControl.Event.valueChanged)
-    tableView.addSubview(refreshControl)
+    collectionView.addSubview(refreshControl)
+    NotificationCenter.default.addObserver(self, selector: #selector(self.unitsChangedReceived(notification:)), name: Notification.Name("UnitsChanged"), object: nil)
     getWeatherData()
+  }
+  
+  @objc func unitsChangedReceived(notification: Notification) {
+    collectionView.reloadData()
   }
   
   @objc func refresh(refrshcontrol: UIRefreshControl){
@@ -57,7 +53,7 @@ class ForecastViewController : UIViewController, UISearchBarDelegate, CLLocation
     Alamofire.request(self.WEATHER_URL, method: .get, parameters: params).responseArray(keyPath: "daily"){ (response: DataResponse<[Forecast]>) in
       if let forecastArray = response.result.value{
         self.forecastArray = forecastArray
-        self.tableView.reloadData()
+        self.collectionView.reloadData()
       } else{
         let alert = UIAlertController(title: "Error", message: "Could not fetch forecast data", preferredStyle: UIAlertController.Style.alert)
         alert.addAction(UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: nil))
@@ -65,26 +61,18 @@ class ForecastViewController : UIViewController, UISearchBarDelegate, CLLocation
         print("Could not fetch forecast data")
       }
     }
-    tableView.reloadData()
   }
   
+  func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    return forecastArray?.count ?? 0
+  }
   
-  func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    let cell : UITableViewCell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-    
-    let weatherObject = forecastArray?[indexPath.section]
-    
-    //cell.textLabel?.text = weatherObject.description
-    cell.textLabel?.text = "\(String(describing: weatherObject?.temperature ?? 0))°"
-    //cell.imageView?.image = UIImage(named: weatherObject.icon)
+  func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+    var cell = UICollectionViewCell()
+    if let customCell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as? CustomCell {
+      customCell.configureCell(forecast: forecastArray![indexPath.row])
+      cell = customCell
+    }
     return cell
-  }
-  
-  func numberOfSections(in tableView: UITableView) -> Int {
-    return 1
-  }
-  
-  func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    return self.forecastArray?.count ?? 0
   }
 }

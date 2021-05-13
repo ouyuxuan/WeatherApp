@@ -1,17 +1,16 @@
 import UIKit
 import CoreLocation
 import Alamofire
-import SwiftyJSON
-import CoreData
+import AlamofireObjectMapper
 
 class WeatherViewController: UIViewController, CLLocationManagerDelegate, ChangeCityDelegate  {
 
   //constants
   let WEATHER_URL = "http://api.openweathermap.org/data/2.5/weather"
   let APP_ID = "APP_ID"
-
+  
+  var weatherData = WeatherDataModel()
   let locationManager = CLLocationManager()
-  let weatherDataModel = WeatherDataModel()
   let refreshControl = UIRefreshControl()
   @IBOutlet weak var scrollView: UIScrollView!
 
@@ -66,62 +65,38 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate, Change
 
   //get data from server
   func getWeatherData(url: String, parameters: [String : String]){
-    Alamofire.request(url, method: .get, parameters: parameters).responseJSON {
-      response in
-      if (response.result.isSuccess) {
-        let weatherJSON : JSON = JSON(response.result.value!)
-        self.updateWeatherData(json: weatherJSON)
-      }
-      else{
+    Alamofire.request(url, method: .get, parameters: parameters).responseObject() { (response: DataResponse<WeatherDataModel>) in
+      if let data = response.result.value {
+        self.weatherData = data
+        self.setDefaults()
+        self.updateUIWithWeatherData()
+      } else {
         self.cityLabel.text = "No internet connection..."
       }
     }
   }
 
-  //MARK: - JSON Parsing
-  /***************************************************************/
-
-
-  //parse json data received
-  func updateWeatherData(json: JSON){
-    if let tempResult = json["main"]["temp"].double {
-      UserDefaults.standard.set(json["coord"]["lat"].stringValue, forKey: "latitude")
-      UserDefaults.standard.set(json["coord"]["lon"].stringValue, forKey: "longitude")
-      weatherDataModel.temperature = tempResult
-      weatherDataModel.city = json["name"].stringValue
-      weatherDataModel.condition = json["weather"][0]["id"].intValue
-      weatherDataModel.weatherIconName = weatherDataModel.updateWeatherIcon(condition: weatherDataModel.condition)
-      weatherDataModel.minTemp = json["main"]["temp_min"].double!
-      weatherDataModel.maxTemp = json["main"]["temp_max"].double!
-
-      if let wind = json["wind"]["speed"].double {
-        weatherDataModel.windSpeed = wind
-        weatherDataModel.direction = json["wind"]["deg"].double!
-        weatherDataModel.directionStr = weatherDataModel.convertDegreeToDirection(direction: weatherDataModel.direction)
-      }
-      updateUIWithWeatherData()
-    }
-    else {
-      cityLabel.text = "Weather unavailable"
-    }
+  func setDefaults() {
+    UserDefaults.standard.set(self.weatherData.latitude, forKey: "latitude")
+    UserDefaults.standard.set(self.weatherData.longitude, forKey: "longitude")
   }
-
 
   //MARK: - UI Updates
   /***************************************************************/
 
-
   //update UI elements
   func updateUIWithWeatherData(){
-    cityLabel.text = weatherDataModel.city
-    temperatureLabel.text = "\(String(format: "%.0f", weatherDataModel.getTemp(temp: weatherDataModel.temperature)))°"
-    weatherIcon.image = UIImage(named: weatherDataModel.weatherIconName)
-    minTemp.text = "Min: \(String(format: "%.0f", weatherDataModel.getTemp(temp: weatherDataModel.minTemp)))°"
-    maxTemp.text = "Max: \(String(format: "%.0f", weatherDataModel.getTemp(temp: weatherDataModel.maxTemp)))°"
+    cityLabel.text = weatherData.city
+    weatherData.weatherIconName = weatherData.condition[0].getWeatherIconName()
+    weatherData.directionStr = weatherData.convertDegreeToDirection()
+    temperatureLabel.text = "\(String(format: "%.0f", weatherData.getTemp(temp: weatherData.temperature)))°"
+    weatherIcon.image = UIImage(named: weatherData.weatherIconName)
+    minTemp.text = "Min: \(String(format: "%.0f", weatherData.getTemp(temp: weatherData.minTemp)))°"
+    maxTemp.text = "Max: \(String(format: "%.0f", weatherData.getTemp(temp: weatherData.maxTemp)))°"
     let windUnits = UserDefaults.standard.bool(forKey: "isCelsius") ? " m/s" : " mph"
-    let windSpeed = weatherDataModel.getSpeed(speed: weatherDataModel.windSpeed)
+    let windSpeed = weatherData.getSpeed(speed: weatherData.windSpeed)
     windSpeedLbl.text = "Windspeed: \(String(format: "%.2f", windSpeed))" + windUnits
-    directionLbl.text = "Direction: " + weatherDataModel.directionStr
+    directionLbl.text = "Direction: " + weatherData.directionStr
   }
 
   //MARK: - Location Manager Delegate Methods

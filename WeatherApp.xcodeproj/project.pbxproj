@@ -10,6 +10,8 @@
 		132086CD2234A24F00296456 /* ForecastViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 132086CC2234A24F00296456 /* ForecastViewController.swift */; };
 		132086CF2234B1F400296456 /* search_icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 132086CE2234B1F400296456 /* search_icon.png */; };
 		132086D12234B82900296456 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 132086D02234B82900296456 /* SettingsViewController.swift */; };
+		132A3F87264DA37200887CDB /* CustomCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 132A3F86264DA37200887CDB /* CustomCell.swift */; };
+		132A3F89264DC1BA00887CDB /* ConditionDataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 132A3F88264DC1BA00887CDB /* ConditionDataModel.swift */; };
 		139A080F264B09C8000EB652 /* ForecastDataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 139A080E264B09C8000EB652 /* ForecastDataModel.swift */; };
 		63E28AD11B99C32400FBF6E0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63E28AD01B99C32400FBF6E0 /* AppDelegate.swift */; };
 		63E28AF11B99C35700FBF6E0 /* WeatherDataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63E28AF01B99C35700FBF6E0 /* WeatherDataModel.swift */; };
@@ -26,6 +28,8 @@
 		132086CC2234A24F00296456 /* ForecastViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastViewController.swift; sourceTree = "<group>"; };
 		132086CE2234B1F400296456 /* search_icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = search_icon.png; path = Images.xcassets/search_icon.png; sourceTree = "<group>"; };
 		132086D02234B82900296456 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
+		132A3F86264DA37200887CDB /* CustomCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomCell.swift; sourceTree = "<group>"; };
+		132A3F88264DC1BA00887CDB /* ConditionDataModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConditionDataModel.swift; sourceTree = "<group>"; };
 		139A080E264B09C8000EB652 /* ForecastDataModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastDataModel.swift; sourceTree = "<group>"; };
 		139A0810264B0D19000EB652 /* WeatherApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WeatherApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		39391A4A9A01789F9F8B692D /* Pods-WeatherApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WeatherApp.release.xcconfig"; path = "Target Support Files/Pods-WeatherApp/Pods-WeatherApp.release.xcconfig"; sourceTree = "<group>"; };
@@ -89,6 +93,7 @@
 			isa = PBXGroup;
 			children = (
 				63E28AF01B99C35700FBF6E0 /* WeatherDataModel.swift */,
+				132A3F88264DC1BA00887CDB /* ConditionDataModel.swift */,
 				139A080E264B09C8000EB652 /* ForecastDataModel.swift */,
 			);
 			name = Model;
@@ -98,6 +103,7 @@
 			isa = PBXGroup;
 			children = (
 				132086CC2234A24F00296456 /* ForecastViewController.swift */,
+				132A3F86264DA37200887CDB /* CustomCell.swift */,
 				63E28AF51B99C36100FBF6E0 /* WeatherViewController.swift */,
 				132086D02234B82900296456 /* SettingsViewController.swift */,
 				63E28AF21B99C36100FBF6E0 /* ChangeCityViewController.swift */,
@@ -253,10 +259,12 @@
 			files = (
 				63E28AF11B99C35700FBF6E0 /* WeatherDataModel.swift in Sources */,
 				63E28AF91B99C36100FBF6E0 /* WeatherViewController.swift in Sources */,
+				132A3F89264DC1BA00887CDB /* ConditionDataModel.swift in Sources */,
 				139A080F264B09C8000EB652 /* ForecastDataModel.swift in Sources */,
 				132086CD2234A24F00296456 /* ForecastViewController.swift in Sources */,
 				63E28AD11B99C32400FBF6E0 /* AppDelegate.swift in Sources */,
 				63E28AF61B99C36100FBF6E0 /* ChangeCityViewController.swift in Sources */,
+				132A3F87264DA37200887CDB /* CustomCell.swift in Sources */,
 				132086D12234B82900296456 /* SettingsViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
