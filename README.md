@@ -4,4 +4,7 @@ Simple weather app fetching data from [openweathermap.org](https://openweatherma
 
 ### Screenshot
 
-<img src="https://user-images.githubusercontent.com/46700306/117893083-bd3aab80-b287-11eb-9a5f-3d9865c29c8f.jpg" width="500">
+
+Current Weather             |  Forecast Weather
+:-------------------------:|:-------------------------:
+<img src="https://user-images.githubusercontent.com/46700306/118185436-87720000-b40a-11eb-827b-9e492e776248.png" width="400">  |  <img src="https://user-images.githubusercontent.com/46700306/118185444-89d45a00-b40a-11eb-91b5-cf6f5391c5be.png" width="400">
